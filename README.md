@@ -51,9 +51,9 @@ git clone https://github.com/bchap1n/Tern-Workstreams ~/Documents/github/Tern-Wo
 tern plugin link ~/Documents/github/Tern-Workstreams
 ```
 
-Then run **Open workstreams** from the palette. No default key chord ships,
-because the preset binds most combinations: bind `plugin.workstreams.open` in
-Preferences if you want one.
+Then run **Open workstreams** from the palette, or press `alt+shift+w`.
+`ctrl+w` cannot work: Tern's keymap preset already owns that chord and
+`tern.bind` drops a chord the preset holds, so no plugin can claim it.
 
 Tern windows that were already open before the plugin was installed have only
 half of it: the block lives in the session daemon, the palette command and the
@@ -113,6 +113,7 @@ else its newest note. Workstreams in `_closed/`, and notes whose frontmatter say
 
 | Key | Does |
 | --- | --- |
+| `alt+shift+w` | Open the panel from any pane |
 | `↑` `↓` / `k` `j` | Move |
 | `Home` `End` / `g` `G` | First, last |
 | `⏎` / `o` | Resume in an omp pane; the panel hides |

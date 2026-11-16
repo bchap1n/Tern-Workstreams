@@ -61,6 +61,8 @@ tern.command({
 	icon = "list",
 	run = open_panel,
 })
--- No default chord: the keymap preset binds most combinations. Bind
--- `plugin.workstreams.open` in Preferences if you want one.
+-- alt+shift+w is one of the few chords the keymap preset leaves free; ctrl+w
+-- belongs to the preset, and tern.bind drops a chord the preset owns, so a
+-- plugin cannot take it (Tern logs `plugin bind left out`).
+tern.bind("alt+shift+w", "plugin.workstreams.open")
 
