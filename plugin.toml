@@ -1,0 +1,12 @@
+schema = 1
+id = "workstreams"
+name = "Workstreams"
+version = "0.1.0"
+description = "Pick an Obsidian workstream note and resume it in an omp pane."
+icon = "list"
+host = "host.luau"
+window = "window.luau"
+
+[[blocks]]
+id = "panel"
+title = "Workstreams"

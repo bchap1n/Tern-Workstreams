@@ -1,0 +1,13 @@
+{
+  "name": "tern-workstreams",
+  "version": "0.1.0",
+  "description": "Obsidian workstream picker: a Tern block plus `/workstreams` in omp.",
+  "license": "MIT",
+  "type": "module",
+  "omp": {
+    "extensions": ["./omp/workstreams.ts"]
+  },
+  "scripts": {
+    "check": "bun run core/workstreams.test.ts"
+  }
+}
