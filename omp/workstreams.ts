@@ -6,7 +6,17 @@
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 import { ageText, findWorkstream, listWorkstreams, seedPrompt, statusIcon } from "../core/workstreams";
 
-export default function(pi: ExtensionAPI): void {
+/** Prints to the terminal outside the TUI; a toast there would be invisible. */
+function say(
+	ctx: { mode: string; ui: { notify(message: string, type?: "info" | "warning" | "error"): void } },
+	text: string,
+	warn = false,
+): void {
+	if (ctx.mode === "tui") ctx.ui.notify(text, warn ? "warning" : "info");
+	else process.stdout.write(`${text}\n`);
+}
+
+export default function (pi: ExtensionAPI): void {
 	pi.registerCommand("workstreams", {
 		description: "List Obsidian workstreams, or switch to one (list | switch [name])",
 		handler: async (args, ctx) => {
@@ -15,7 +25,7 @@ export default function(pi: ExtensionAPI): void {
 			if (verb === "list") {
 				const list = listWorkstreams({ all: rest.includes("--all") });
 				if (list.length === 0) {
-					ctx.ui.notify("No workstreams found. Set roots in ~/.config/tern-workstreams/config.json", "warning");
+					say(ctx, "No workstreams found. Set roots in ~/.config/tern-workstreams/config.json", true);
 					return;
 				}
 				const width = Math.max(...list.map(w => w.name.length));
@@ -24,12 +34,12 @@ export default function(pi: ExtensionAPI): void {
 					const state = w.waitingOnUser ? "needs you" : w.status;
 					return `${statusIcon(w)} ${w.name.padEnd(width)}  ${progress}  ${ageText(w.ageDays).padStart(3)}  ${state}`;
 				});
-				ctx.ui.notify(`Workstreams\n${lines.join("\n")}`, "info");
+				say(ctx, `Workstreams\n${lines.join("\n")}`);
 				return;
 			}
 
 			if (verb !== "switch") {
-				ctx.ui.notify("Usage: /workstreams list | switch [name]", "warning");
+				say(ctx, "Usage: /workstreams list | switch [name]", true);
 				return;
 			}
 
@@ -47,10 +57,10 @@ export default function(pi: ExtensionAPI): void {
 				target = label ? list.find(w => label.endsWith(w.name)) : undefined;
 			}
 			if (!target) {
-				ctx.ui.notify(query ? `No workstream matches "${query}"` : "No workstream selected", "warning");
+				say(ctx, query ? `No workstream matches "${query}"` : "No workstream selected", true);
 				return;
 			}
-			ctx.ui.notify(`Resuming ${target.name}`, "info");
+			say(ctx, `Resuming ${target.name}`);
 			await pi.sendUserMessage(seedPrompt(target));
 		},
 	});
