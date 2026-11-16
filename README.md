@@ -55,6 +55,12 @@ Then run **Open workstreams** from the palette. No default key chord ships,
 because the preset binds most combinations: bind `plugin.workstreams.open` in
 Preferences if you want one.
 
+Tern windows that were already open before the plugin was installed have only
+half of it: the block lives in the session daemon, the palette command and the
+route that resumes a pick live in each window. Reload with **Reload plugins**
+from the palette (or restart Tern) after installing, or pressing `⏎`/`v` in
+the panel asks Windows for an app that opens `workstream:` links.
+
 For omp, add the extension to your `~/.omp/agent/config.yml`:
 
 ```yaml
