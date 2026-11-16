@@ -37,10 +37,18 @@ cold (grey).
 
 ## Install
 
+Tern copies the plugin where your panes run, no checkout needed:
+
 ```sh
-git clone https://github.com/bchap1n/Tern-Workstreams
-cd Tern-Workstreams
-tern plugin link .
+tern plugin install github.com/bchap1n/Tern-Workstreams --force
+```
+
+Clone instead if you also want the `/workstreams` command, which omp loads
+from a directory:
+
+```sh
+git clone https://github.com/bchap1n/Tern-Workstreams ~/Documents/github/Tern-Workstreams
+tern plugin link ~/Documents/github/Tern-Workstreams
 ```
 
 Then run **Open workstreams** from the palette. No default key chord ships,
