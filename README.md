@@ -74,12 +74,23 @@ session.
 
 ## Config
 
-The plugin finds every Obsidian vault that has a `workstreams` folder. To pick
-your own folders, write `~/.config/tern-workstreams/config.json`:
+The plugin finds every Obsidian vault that has a `workstreams` folder. Press `w`
+in the panel to list those folders and turn each one on or off; the choice is
+saved in `~/.config/tern-workstreams/config.json` as `hidden`, so a work vault
+stays out of the way on a personal machine without hiding a vault you add later:
+
+```json
+{ "hidden": ["C:/Users/me/OneDrive/_obsidian_work/Workstreams"] }
+```
+
+To skip discovery entirely, pin the folders instead:
 
 ```json
 { "roots": ["C:/Users/me/OneDrive/_obsidian_work/Workstreams"] }
 ```
+
+`TERN_WORKSTREAMS_CONFIG` points both the plugin and the omp command at a
+different file.
 
 ## Note shape
 
@@ -119,6 +130,7 @@ else its newest note. Workstreams in `_closed/`, and notes whose frontmatter say
 | `⏎` / `o` | Resume in an omp pane; the panel hides |
 | `v` / `space` | Toggle the note preview, growing or shrinking the pane |
 | `Esc` | Back to the list, then close the panel |
+| `w` | Swap in the folder picker: `⏎` turns a vault's folder on or off |
 | `a` | Show or hide closed workstreams |
 | `r` | Read the vault again |
 

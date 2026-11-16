@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { ageText, findWorkstream, listWorkstreams, parseNote, statusIcon } from "./workstreams";
+import { ageText, findWorkstream, listRoots, listWorkstreams, loadConfig, parseNote, statusIcon, toggleRoot } from "./workstreams";
 
 const base = fs.mkdtempSync(path.join(os.tmpdir(), "ws-test-"));
 const root = path.join(base, "Workstreams");
@@ -78,6 +78,21 @@ assert.equal(ageText(9.7), "9d");
 assert.equal(ageText(120), "4mo");
 const single = findWorkstream("single note", list);
 assert.equal(single && statusIcon(single), "⚑", "a workstream waiting on the user gets the flag icon");
+
+// A folder turned off in the panel stays off across runs and comes back on a
+// second toggle; the config file is the only state.
+const cfg = path.join(base, "config.json");
+process.env.TERN_WORKSTREAMS_CONFIG = cfg;
+fs.writeFileSync(cfg, JSON.stringify({ roots: [root], hidden: [root.toUpperCase()] }));
+assert.deepEqual(loadConfig().roots, [], "a hidden folder (any case) drops out of the scan");
+assert.deepEqual(
+	listRoots().map(r => [r.enabled, r.count]),
+	[[false, 2]],
+	"the picker still lists a hidden folder, off, showing what it holds",
+);
+assert.deepEqual(toggleRoot(root).map(r => r.enabled), [true], "toggling it back on re-enables it");
+assert.deepEqual(loadConfig().roots, [root]);
+assert.deepEqual(JSON.parse(fs.readFileSync(cfg, "utf8")), { roots: [root], hidden: [] }, "the choice is saved");
 
 fs.rmSync(base, { recursive: true, force: true });
 console.log("ok");

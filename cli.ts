@@ -1,7 +1,18 @@
 // CLI bridge for the Tern plugin. Emits JSON on stdout:
 //   bun cli.ts list [--all]
 //   bun cli.ts show <id-or-name>
-import { ageBand, ageText, findWorkstream, listWorkstreams, seedPrompt, statusIcon } from "./core/workstreams";
+//   bun cli.ts roots
+//   bun cli.ts toggle <folder-path>
+import {
+	ageBand,
+	ageText,
+	findWorkstream,
+	listRoots,
+	listWorkstreams,
+	seedPrompt,
+	statusIcon,
+	toggleRoot,
+} from "./core/workstreams";
 
 const [cmd = "list", ...rest] = process.argv.slice(2);
 
@@ -36,7 +47,11 @@ if (cmd === "list") {
 		markdown: note.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, ""),
 		prompt: seedPrompt(w),
 	});
+} else if (cmd === "roots") {
+	emit(listRoots());
+} else if (cmd === "toggle") {
+	emit(toggleRoot(rest.join(" ")));
 } else {
-	process.stderr.write(`usage: cli.ts [list [--all] | show <id-or-name>]\n`);
+	process.stderr.write(`usage: cli.ts [list [--all] | show <id-or-name> | roots | toggle <folder-path>]\n`);
 	process.exit(2);
 }

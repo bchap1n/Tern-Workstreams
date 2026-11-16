@@ -35,15 +35,81 @@ export interface Config {
 	roots: string[];
 }
 
-export const CONFIG_PATH = path.join(os.homedir(), ".config", "tern-workstreams", "config.json");
+/** What the config file holds: pinned roots (optional) and the folders turned off in the panel. */
+interface RawConfig {
+	roots?: string[];
+	hidden?: string[];
+}
+
+/** `TERN_WORKSTREAMS_CONFIG` points the plugin at another file; tests use it. */
+export function configPath(): string {
+	return process.env.TERN_WORKSTREAMS_CONFIG ?? path.join(os.homedir(), ".config", "tern-workstreams", "config.json");
+}
+
+/** Paths compare case-insensitively: vaults live on Windows drives and case drifts. */
+function pathKey(p: string): string {
+	return path.resolve(p).toLowerCase();
+}
+
+function readConfig(): RawConfig {
+	try {
+		return JSON.parse(fs.readFileSync(configPath(), "utf8")) as RawConfig;
+	} catch {
+		return {};
+	}
+}
+
+/** The candidate folders before `hidden` removes any: the pinned `roots`, else every vault's workstreams dir. */
+function declaredRoots(raw: RawConfig): string[] {
+	return Array.isArray(raw.roots) && raw.roots.length > 0 ? raw.roots : discoverRoots();
+}
+
+function hiddenKeys(raw: RawConfig): Set<string> {
+	return new Set((raw.hidden ?? []).map(pathKey));
+}
 
 /** Reads the config, else finds every Obsidian vault with a `workstreams` dir (any case). */
 export function loadConfig(): Config {
-	try {
-		const cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8")) as Partial<Config>;
-		if (Array.isArray(cfg.roots) && cfg.roots.length > 0) return { roots: cfg.roots };
-	} catch { }
-	return { roots: discoverRoots() };
+	const raw = readConfig();
+	const hidden = hiddenKeys(raw);
+	return { roots: declaredRoots(raw).filter(r => !hidden.has(pathKey(r))) };
+}
+
+export interface RootInfo {
+	path: string;
+	/** The vault directory name, which is what a person recognizes. */
+	label: string;
+	enabled: boolean;
+	/** Workstreams this folder contributes while it is on. */
+	count: number;
+}
+
+/** Every candidate folder with its on/off state; `w` in the panel flips them. */
+export function listRoots(): RootInfo[] {
+	const raw = readConfig();
+	const hidden = hiddenKeys(raw);
+	return declaredRoots(raw).map(p => {
+		const enabled = !hidden.has(pathKey(p));
+		return {
+			path: p,
+			label: path.basename(path.dirname(p)) || p,
+			enabled,
+			count: listWorkstreams({ config: { roots: [p] } }).length,
+		};
+	});
+}
+
+/** Turns one folder on or off and saves the choice; returns the refreshed list. */
+export function toggleRoot(rootPath: string): RootInfo[] {
+	const raw = readConfig();
+	const key = pathKey(rootPath);
+	const wasHidden = hiddenKeys(raw).has(key);
+	const next = (raw.hidden ?? []).filter(p => pathKey(p) !== key);
+	if (!wasHidden) next.push(path.resolve(rootPath));
+	const saved: RawConfig = { ...raw, hidden: next };
+	fs.mkdirSync(path.dirname(configPath()), { recursive: true });
+	fs.writeFileSync(configPath(), `${JSON.stringify(saved, null, 2)}\n`);
+	return listRoots();
 }
 
 function obsidianJson(): string {
